@@ -1,0 +1,75 @@
+---
+title: "Examen Programmation Statistiques"
+author: "Aurélien SINTES"
+date: "2024-12-18"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(data.table)
+```
+
+
+Écrire une fonction dans R qui lit les 60 fichiers csv avec les données de ventes
+du FXD JET 100 entre 2020-01-01 et 2024-12-31. Assurez vous que cette fonction
+peut être réutilisée pour lire les fichiers csv en utilisant des dates différentes que
+celles spécifiées ci-dessus comme 2020-01-01 et 2022-12-31 ou similaire.
+
+```{r}
+
+liste <- list.files("/home/UCA/ausintes/Prog_stat2/exam_data/exam_data/")
+path <- "/home/UCA/ausintes/Prog_stat2/exam_data/exam_data/"
+liste <- paste0(path, liste) 
+
+extract <- function(file) { 
+dataa <- read.csv(file, sep = ",", header = TRUE,stringsAsFactors = FALSE) 
+return(dataa) 
+} 
+
+donnee <- map_df(liste, extract) 
+
+head(donnee)
+view(donnee)
+```
+
+
+Visualiser les données de ventes avec ggplot2 et choisissez la visualisation qui
+montre le mieux l’évolution des ventes entre 2020-01-01 et 2024-12-31. Cette
+visualisation sera partagée avec d’autres personnes donc assurez vous de bien
+communiquer ce que le graphe montre et contient directement dans le
+graphique.
+
+
+
+```{r}
+donnee %>%
+  mutate(date = as.Date(date)) %>%
+  ggplot(aes(x = date, y = nb_de_ventes, color = nb_de_ventes)) +
+  geom_line(size = 1) +
+  geom_hline(yintercept = mean(donnee$nb_de_ventes, na.rm = TRUE), 
+             color = "red", linetype = "solid", size = 0.5) +
+  geom_smooth(method = "loess", se = FALSE, color = "black", linetype = "dotted", size = 1) +
+  scale_color_gradient(low = "red", high = "green") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Ventes",
+    title = "Évolution des ventes journalières (2020-2024)",
+    subtitle = "Courbe colorée selon les ventes\nLigne rouge : moyenne globale\nLigne noire : tendance lissée",
+    color = "Nombre de ventes"
+  )
+```
+
+
+
+
+
+
+
+
+
+
